@@ -31,3 +31,7 @@
 - Integrated Nodemailer for transactional emails
 - Created HTML email templates for alerts and onboarding
 
+## Frontend Development
+- Designed responsive landing page with animated hero
+- Added feature grid and testimonials sections
+
