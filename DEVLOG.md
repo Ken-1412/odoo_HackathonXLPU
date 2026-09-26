@@ -38,4 +38,6 @@
 - Added forgot password and reset password flows
 - Built responsive dashboard layout with collapsible sidebar
 - Added header with user menu and notifications
+- Implemented product listing with sortable, filterable tables
+- Added inline editing and bulk actions
 
