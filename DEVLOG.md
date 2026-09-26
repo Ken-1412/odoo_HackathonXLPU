@@ -18,4 +18,6 @@
 - Added input validation with Zod
 - Added Organization model with multi-tenant support
 - Created Employee model with role-based access
+- Built inventory service with create, read, update, delete operations
+- Added pagination and filtering utilities
 
