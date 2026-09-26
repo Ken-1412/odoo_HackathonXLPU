@@ -34,4 +34,6 @@
 ## Frontend Development
 - Designed responsive landing page with animated hero
 - Added feature grid and testimonials sections
+- Created login and signup pages with form validation
+- Added forgot password and reset password flows
 
