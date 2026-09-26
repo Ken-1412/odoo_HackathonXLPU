@@ -66,4 +66,7 @@
 ## Documentation
 - Wrote detailed README with architecture overview
 - Added environment setup guide and API documentation
+- Created TEAM_COMMIT_DISTRIBUTION.txt
+- Added .env.example files for both frontend and backend
+- Final cleanup and code review
 
