@@ -1,0 +1,191 @@
+================================================================================
+STOCKSENSE - 4-PERSON ZERO-CONFLICT GIT COMMIT DISTRIBUTION PLAN
+Total Commits: 20 (Exactly 5 commits per person)
+Team: 2 Backend Developers, 2 Frontend Developers
+================================================================================
+
+OVERVIEW & CONFLICT-FREE STRATEGY:
+- To prevent ANY merge conflicts, each developer is assigned a mutually exclusive
+  directory & file domain.
+- No two developers will edit the same file.
+- Each developer creates their own branch, performs their 5 commits in order,
+  and merges/rebases into the main branch.
+
+--------------------------------------------------------------------------------
+TEAM MATRIX
+--------------------------------------------------------------------------------
+Developer 1 (Backend Core)     : feat/backend-core-inventory
+Developer 2 (Backend Ops & AI) : feat/backend-operations-ai
+Developer 3 (Frontend Shell)   : feat/frontend-shell-dashboard
+Developer 4 (Frontend Modules) : feat/frontend-modules-voice
+
+
+================================================================================
+PERSON 1: BACKEND DEVELOPER 1 (Core Inventory & Master Data)
+Branch: feat/backend-core-inventory
+Domain: Database schemas, Models, Products, Categories, Warehouses, Locations, Seeding
+================================================================================
+
+# Step 0: Create and switch to your feature branch
+git checkout -b feat/backend-core-inventory
+
+# --- COMMIT 1/5 ---
+git add backend/src/models/ backend/src/types/
+git commit -m "feat(backend/models): initialize database schemas for products, warehouses, and storage locations"
+
+# --- COMMIT 2/5 ---
+git add backend/src/controllers/product.controller.ts backend/src/controllers/category.controller.ts backend/src/routes/product.routes.ts
+git commit -m "feat(backend/products): implement product catalogue CRUD, barcode scanning, and category hierarchy"
+
+# --- COMMIT 3/5 ---
+git add backend/src/controllers/warehouse.controller.ts backend/src/controllers/location.controller.ts backend/src/routes/warehouse.routes.ts
+git commit -m "feat(backend/warehouses): build warehouse spatial layout with zones, racks, and bin capacity tracking"
+
+# --- COMMIT 4/5 ---
+git add backend/src/scripts/seed.ts backend/src/config/
+git commit -m "feat(backend/seed): create deterministic multi-warehouse inventory mock dataset with 720 SKU records"
+
+# --- COMMIT 5/5 ---
+git add backend/src/validators/ backend/src/repositories/
+git commit -m "test(backend/core): add validation schemas and repository unit tests for core inventory models"
+
+# Push branch to remote
+git push -u origin feat/backend-core-inventory
+
+
+================================================================================
+PERSON 2: BACKEND DEVELOPER 2 (Operations, Telemetry & Voice AI)
+Branch: feat/backend-operations-ai
+Domain: Receipts, Deliveries, Transfers, Adjustments, Azure Telemetry, OmniDimension AI
+================================================================================
+
+# Step 0: Create and switch to your feature branch
+git checkout -b feat/backend-operations-ai
+
+# --- COMMIT 1/5 ---
+git add backend/src/controllers/receipt.controller.ts backend/src/routes/receipt.routes.ts
+git commit -m "feat(backend/receipts): implement vendor goods receipt intake, batch lot numbers, and status transitions"
+
+# --- COMMIT 2/5 ---
+git add backend/src/controllers/delivery.controller.ts backend/src/routes/delivery.routes.ts
+git commit -m "feat(backend/deliveries): build outbound delivery workflow supporting picking, packing, and dispatch states"
+
+# --- COMMIT 3/5 ---
+git add backend/src/controllers/transfer.controller.ts backend/src/controllers/adjustment.controller.ts backend/src/controllers/moveHistory.controller.ts
+git commit -m "feat(backend/transfers): add inter-warehouse transfer workflows and physical inventory stock adjustments"
+
+# --- COMMIT 4/5 ---
+git add backend/src/controllers/dashboard.controller.ts backend/src/services/telemetry.service.ts
+git commit -m "feat(backend/telemetry): implement Azure Logistics Grid telemetry metrics for throughput and facility status"
+
+# --- COMMIT 5/5 ---
+git add backend/src/controllers/omnidim.controller.ts backend/src/controllers/aiVoice.controller.ts backend/src/controllers/omnidimensionWebhook.controller.ts
+git commit -m "feat(backend/voice-ai): integrate OmniDimension Voice AI assistant endpoints with real-time stock lookup tools"
+
+# Push branch to remote
+git push -u origin feat/backend-operations-ai
+
+
+================================================================================
+PERSON 3: FRONTEND DEVELOPER 1 (Design System, Layout, Shell & Dashboard)
+Branch: feat/frontend-shell-dashboard
+Domain: Design tokens, Theme assets, Layout shell, Header, Sidebar, Dashboard & Charts
+================================================================================
+
+# Step 0: Create and switch to your feature branch
+git checkout -b feat/frontend-shell-dashboard
+
+# --- COMMIT 1/5 ---
+git add frontend/src/stocksense-tokens.css frontend/src/index.css public/stocksense-dashboard-theme.jpg
+git commit -m "feat(frontend/theme): configure enterprise azure design tokens, glassmorphism, and atmospheric top banner"
+
+# --- COMMIT 2/5 ---
+git add frontend/src/components/stocksense/layout/StockSenseLayout.tsx frontend/src/components/stocksense/layout/StockSenseHeader.tsx
+git commit -m "feat(frontend/shell): build responsive application shell with frosted glass top header and quick search bar"
+
+# --- COMMIT 3/5 ---
+git add frontend/src/components/stocksense/layout/StockSenseSidebar.tsx
+git commit -m "feat(frontend/sidebar): implement clean hierarchical navigation for Dashboard, Operations, Intelligence, and Settings"
+
+# --- COMMIT 4/5 ---
+git add frontend/src/components/stocksense/pages/StockSenseDashboard.tsx
+git commit -m "feat(frontend/kpi): implement top 5 KPI metrics cards with live telemetry and colored sparkline visualizers"
+
+# --- COMMIT 5/5 ---
+git add frontend/src/components/stocksense/pages/StockSenseDashboard.tsx
+git commit -m "feat(frontend/charts): create multi-warehouse stacked bar chart and stock status donut ring distribution"
+
+# Push branch to remote
+git push -u origin feat/frontend-shell-dashboard
+
+
+================================================================================
+PERSON 4: FRONTEND DEVELOPER 2 (Module Views, Tables, Ledger & Voice UI)
+Branch: feat/frontend-modules-voice
+Domain: Products Catalogue, Receipts view, Deliveries view, Transfers, Ledger, OmniDim UI
+================================================================================
+
+# Step 0: Create and switch to your feature branch
+git checkout -b feat/frontend-modules-voice
+
+# --- COMMIT 1/5 ---
+git add frontend/src/components/stocksense/pages/StockSenseProducts.tsx frontend/src/components/stocksense/pages/StockSenseCategories.tsx
+git commit -m "feat(frontend/products): implement product catalogue view with search, category filtering, and reorder warnings"
+
+# --- COMMIT 2/5 ---
+git add frontend/src/components/stocksense/pages/StockSenseReceipts.tsx frontend/src/components/stocksense/pages/StockSenseDeliveries.tsx
+git commit -m "feat(frontend/orders): create operational tracking tables for inbound receipts and customer delivery orders"
+
+# --- COMMIT 3/5 ---
+git add frontend/src/components/stocksense/pages/StockSenseTransfers.tsx frontend/src/components/stocksense/pages/StockSenseAdjustments.tsx frontend/src/components/stocksense/pages/StockSenseLedger.tsx
+git commit -m "feat(frontend/ledger): build inter-facility transfer manager and immutable stock move history audit ledger"
+
+# --- COMMIT 4/5 ---
+git add frontend/src/components/stocksense/pages/StockSenseOmniDim.tsx
+git commit -m "feat(frontend/voice-ai): build OmniDimension Voice AI interface with live acoustic wave visualizer and audio stream"
+
+# --- COMMIT 5/5 ---
+git add frontend/src/components/stocksense/pages/StockSenseWarehouses.tsx frontend/src/components/stocksense/pages/StockSenseProfile.tsx frontend/src/components/stocksense/pages/StockSenseSettings.tsx
+git commit -m "feat(frontend/settings): implement warehouse 3D zone browser, organization preferences, and user profile view"
+
+# Push branch to remote
+git push -u origin feat/frontend-modules-voice
+
+
+================================================================================
+MERGE SEQUENCE (GUARANTEED 0 CONFLICTS)
+================================================================================
+
+Once all 4 developers have completed their 5 commits:
+
+1. Merge Person 1 (Backend Core):
+   git checkout main
+   git merge feat/backend-core-inventory --no-ff -m "merge: backend core inventory models and master data"
+   git push origin main
+
+2. Merge Person 2 (Backend Operations & AI):
+   git checkout feat/backend-operations-ai
+   git rebase main
+   git checkout main
+   git merge feat/backend-operations-ai --no-ff -m "merge: backend operations and OmniDimension AI"
+   git push origin main
+
+3. Merge Person 3 (Frontend Shell & Dashboard):
+   git checkout feat/frontend-shell-dashboard
+   git rebase main
+   git checkout main
+   git merge feat/frontend-shell-dashboard --no-ff -m "merge: frontend shell layout, design tokens, and dashboard"
+   git push origin main
+
+4. Merge Person 4 (Frontend Module Views & Voice UI):
+   git checkout feat/frontend-modules-voice
+   git rebase main
+   git checkout main
+   git merge feat/frontend-modules-voice --no-ff -m "merge: frontend module views, data tables, and voice assistant UI"
+   git push origin main
+
+RESULT:
+- Exactly 20 commits (5 per person) + clean merge history
+- 0 Merge Conflicts
+- Clean enterprise Git history
+================================================================================

@@ -1,0 +1,731 @@
+// ─── AssetFlow — Prisma Schema ──────────────────────────────────────────────
+// Enterprise Asset & Resource Management System
+// 16 models with full relational integrity
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ──────────────────────────────────────────────────────────────────
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum AssetStatus {
+  AVAILABLE
+  ALLOCATED
+  RESERVED
+  MAINTENANCE
+  LOST
+  DISPOSED
+  RETIRED
+}
+
+enum TransferStatus {
+  REQUESTED
+  DEPT_HEAD_APPROVED
+  ASSET_MANAGER_APPROVED
+  TRANSFERRED
+  REJECTED
+}
+
+enum MaintenanceStatus {
+  PENDING
+  APPROVED
+  TECHNICIAN_ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum AuditItemStatus {
+  VERIFIED
+  MISSING
+  DAMAGED
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+  CANCELLED
+  COMPLETED
+}
+
+enum NotificationType {
+  ASSET_REQUESTED
+  ASSET_ASSIGNED
+  ASSET_REJECTED
+  ASSET_RETURNED
+  TRANSFER_REQUESTED
+  TRANSFER_APPROVED
+  TRANSFER_REJECTED
+  BOOKING_REQUESTED
+  BOOKING_CONFIRMED
+  BOOKING_REJECTED
+  BOOKING_CANCELLED
+  BOOKING_REMINDER
+  MAINTENANCE_REQUESTED
+  MAINTENANCE_APPROVED
+  MAINTENANCE_RESOLVED
+  AUDIT_ASSIGNED
+  OVERDUE_RETURN
+  EMPLOYEE_CREATED
+  DEPARTMENT_CREATED
+  CATEGORY_CREATED
+  EMPLOYEE_LOGIN
+  AI_CALL_COMPLETED
+  AI_CALL_FAILED
+  AI_AUDIT_COMPLETED
+  GENERAL
+}
+
+// ─── Models ─────────────────────────────────────────────────────────────────
+
+model Organization {
+  id                  String   @id @default(cuid())
+  name                String
+  slug                String?  @unique
+  logo                String?
+  industry            String?
+  companySize         String?
+  country             String?
+  timezone            String?
+  currency            String?  @default("USD")
+  address             String?
+  website             String?
+  description         String?
+  onboardingStep      String   @default("ORGANIZATION") // ORGANIZATION | DEPARTMENTS | EMPLOYEES | ASSETS | COMPLETED
+  onboardingCompleted Boolean  @default(false)
+  createdBy           String?
+
+  users               User[]
+  departments         Department[]
+  categories          AssetCategory[]
+  assets              Asset[]
+  assetRequests       AssetRequest[]
+  bookings            Booking[]
+  maintenanceRequests MaintenanceRequest[]
+  auditCycles         AuditCycle[]
+  notifications       Notification[]
+  activityLogs        ActivityLog[]
+  reports             Report[]
+  aiVoiceCalls        AIVoiceCall[]
+  aiCallCampaigns     AICallCampaign[]
+  aiAuditVerifications AIAuditVerification[]
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("organizations")
+}
+
+model Role {
+  id        String   @id @default(cuid())
+  name      String   @unique // Administrator, Asset Manager, Department Head, Employee
+  users     User[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("roles")
+}
+
+model User {
+  id           String     @id @default(cuid())
+  name         String
+  email        String     @unique
+  password     String?
+  avatar       String?
+  status       UserStatus @default(ACTIVE)
+
+  // OAuth fields
+  googleId     String?    @unique
+  provider     String     @default("local")  // "local" | "google"
+  
+  roleId       String
+  role         Role       @relation(fields: [roleId], references: [id])
+  
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  isOrganizationOwner Boolean  @default(false)
+
+  departmentId String?
+  department   Department? @relation("DepartmentEmployees", fields: [departmentId], references: [id])
+
+  // Refresh token for JWT rotation
+  refreshToken String?
+
+  // Password reset token fields for Admin Forgot Password
+  resetPasswordToken        String?
+  resetPasswordTokenExpires DateTime?
+
+  // ─── Employee Management Fields ───────────────────────────────────────
+  employeeId          String?    // Custom employee ID (e.g. EMP-001)
+  phone               String?
+  designation         String?    // Job title
+  employmentType      String?    @default("full-time") // full-time, part-time, contract, intern
+  joiningDate         DateTime?
+  forcePasswordChange Boolean    @default(true)
+  passwordUpdatedAt   DateTime?
+  failedLoginAttempts Int        @default(0)
+  isLocked            Boolean    @default(false)
+  lockedUntil         DateTime?
+  isDeleted           Boolean    @default(false)
+  lastLoginAt         DateTime?
+
+  // Manager self-relation
+  managerId           String?
+  manager             User?      @relation("ManagerReports", fields: [managerId], references: [id])
+  directReports       User[]     @relation("ManagerReports")
+
+  // Who created this employee account
+  createdById         String?
+
+  // Relations
+  allocatedAssets   AssetAllocation[]   @relation("AllocatedTo")
+  assetHistory      AssetHistory[]
+  assetRequests     AssetRequest[]      @relation("AssetRequester")
+  requestApprovals  AssetRequest[]      @relation("AssetRequestApprover")
+  transfersFrom     TransferRequest[]   @relation("TransferFrom")
+  transfersTo       TransferRequest[]   @relation("TransferTo")
+  transferApprovals TransferRequest[]   @relation("TransferApprover")
+  bookings          Booking[]
+  maintenanceReqs   MaintenanceRequest[] @relation("MaintenanceRequester")
+  notifications     Notification[]
+  activityLogs      ActivityLog[]
+  generatedReports  Report[]
+  auditAssignments  AuditCycle[]        @relation("AuditAuditors")
+  employeeVoiceCalls AIVoiceCall[]      @relation("EmployeeVoiceCalls")
+  initiatedVoiceCalls AIVoiceCall[]     @relation("InitiatedVoiceCalls")
+  createdCallCampaigns AICallCampaign[]  @relation("CreatedCallCampaigns")
+  
+  // Department head relation
+  headOfDepartments Department[]        @relation("DepartmentHead")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Department {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  status      UserStatus @default(ACTIVE)
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  // Self-relation for parent/child hierarchy
+  parentId    String?
+  parent      Department?  @relation("DepartmentHierarchy", fields: [parentId], references: [id])
+  children    Department[] @relation("DepartmentHierarchy")
+
+  // Head of department
+  headId      String?
+  head        User?      @relation("DepartmentHead", fields: [headId], references: [id])
+
+  // Employees in this department
+  employees   User[]     @relation("DepartmentEmployees")
+
+  // Assets in this department
+  assets      Asset[]
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("departments")
+}
+
+model AssetCategory {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  iconName    String     @default("Laptop")
+  status      UserStatus @default(ACTIVE)
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  assets       Asset[]
+  customFields CustomField[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("asset_categories")
+}
+
+model CustomField {
+  id       String  @id @default(cuid())
+  name     String
+  type     String  // Text, Number, Date, Dropdown
+  required Boolean @default(false)
+
+  categoryId String
+  category   AssetCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@map("custom_fields")
+}
+
+model Asset {
+  id           String      @id @default(cuid())
+  tag          String      @unique // Asset Code (e.g. AF-0012)
+  name         String
+  type         String?     // Laptop, Phone, Server, Vehicle, Furniture, etc.
+  manufacturer String?
+  model        String?
+  serialNumber String?     @unique
+  barcode      String?     @unique // Barcode / QR Code
+  qrCode       String?
+  description  String?
+  status       AssetStatus @default(AVAILABLE)
+  location     String?
+
+  // Location Details
+  building     String?
+  floor        String?
+  room         String?
+  storageLocation String?
+
+  // Media & Attachments
+  imageUrl     String?
+  documentUrl  String?
+  notes        String?
+
+  // Purchase & Ownership Details
+  purchaseDate   DateTime?
+  purchaseCost   Float?
+  currentValue   Float?
+  warrantyExpiry DateTime?
+  expectedLifeMonths Int?
+  depreciationMethod String?
+  vendor         String?
+  poNumber       String?
+  invoiceNumber  String?
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  categoryId   String
+  category     AssetCategory @relation(fields: [categoryId], references: [id])
+
+  departmentId String?
+  department   Department?   @relation(fields: [departmentId], references: [id])
+
+  // Current allocation
+  allocatedToId String?
+
+  // Relations
+  allocations   AssetAllocation[]
+  requests      AssetRequest[]
+  history       AssetHistory[]
+  transfers     TransferRequest[]
+  maintenance   MaintenanceRequest[]
+  auditItems    AuditItem[]
+  bookings      Booking[]
+  voiceCalls    AIVoiceCall[]         @relation("AssetVoiceCalls")
+  auditVerifications AIAuditVerification[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("assets")
+}
+
+model AssetHistory {
+  id      String   @id @default(cuid())
+  event   String
+  details String?
+  date    DateTime @default(now())
+
+  assetId String
+  asset   Asset  @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  userId  String?
+  user    User?  @relation(fields: [userId], references: [id])
+
+  @@map("asset_history")
+}
+
+model AssetAllocation {
+  id          String    @id @default(cuid())
+  allocatedAt DateTime  @default(now())
+  returnedAt  DateTime?
+  returnCondition String?
+  isActive    Boolean   @default(true)
+
+  assetId     String
+  asset       Asset     @relation(fields: [assetId], references: [id])
+
+  userId      String
+  user        User      @relation("AllocatedTo", fields: [userId], references: [id])
+
+  @@unique([assetId, isActive]) // Prevent double allocation
+  @@map("asset_allocations")
+}
+
+model AssetRequest {
+  id           String        @id @default(cuid())
+  reason       String?
+  status       RequestStatus @default(PENDING)
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  assetId      String
+  asset        Asset         @relation(fields: [assetId], references: [id])
+
+  userId       String
+  user         User          @relation("AssetRequester", fields: [userId], references: [id])
+
+  approvedById String?
+  approvedBy   User?         @relation("AssetRequestApprover", fields: [approvedById], references: [id])
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@map("asset_requests")
+}
+
+model TransferRequest {
+  id       String         @id @default(cuid())
+  reason   String?
+  status   TransferStatus @default(REQUESTED)
+
+  assetId  String
+  asset    Asset          @relation(fields: [assetId], references: [id])
+
+  fromUserId String
+  fromUser   User         @relation("TransferFrom", fields: [fromUserId], references: [id])
+
+  toUserId   String
+  toUser     User         @relation("TransferTo", fields: [toUserId], references: [id])
+
+  approvedById String?
+  approvedBy   User?      @relation("TransferApprover", fields: [approvedById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("transfer_requests")
+}
+
+model Booking {
+  id           String        @id @default(cuid())
+  resourceName String        // e.g. "Conference room B2"
+  resourceType String        @default("room") // room, vehicle, equipment
+  date         DateTime
+  startTime    String        // "09:00"
+  endTime      String        // "10:00"
+  status       BookingStatus @default(PENDING)
+  notes        String?
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+
+  // Optional: link to a specific asset
+  assetId      String?
+  asset        Asset?        @relation(fields: [assetId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("bookings")
+}
+
+model MaintenanceRequest {
+  id             String            @id @default(cuid())
+  issue          String
+  status         MaintenanceStatus @default(PENDING)
+  technicianName String?
+  imageUrl       String?
+  resolvedAt     DateTime?
+  notes          String?
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  assetId        String
+  asset          Asset             @relation(fields: [assetId], references: [id])
+
+  requestedById  String
+  requestedBy    User              @relation("MaintenanceRequester", fields: [requestedById], references: [id])
+
+  voiceCalls     AIVoiceCall[]     @relation("MaintenanceVoiceCalls")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("maintenance_requests")
+}
+
+model AuditCycle {
+  id         String     @id @default(cuid())
+  name       String     // e.g. "Q3 audit: Engineering dept"
+  department String
+  startDate  DateTime
+  endDate    DateTime
+  isOpen     Boolean    @default(true)
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  items      AuditItem[]
+  auditors   User[]     @relation("AuditAuditors")
+  voiceCalls AIVoiceCall[] @relation("AuditVoiceCalls")
+  campaigns  AICallCampaign[] @relation("AuditCallCampaigns")
+  auditVerifications AIAuditVerification[]
+
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@map("audit_cycles")
+}
+
+model AuditItem {
+  id       String          @id @default(cuid())
+  status   AuditItemStatus @default(VERIFIED)
+
+  auditCycleId String
+  auditCycle   AuditCycle  @relation(fields: [auditCycleId], references: [id], onDelete: Cascade)
+
+  assetId      String
+  asset        Asset       @relation(fields: [assetId], references: [id])
+
+  @@map("audit_items")
+}
+
+model Notification {
+  id      String           @id @default(cuid())
+  type    NotificationType @default(GENERAL)
+  message String
+  isRead  Boolean          @default(false)
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  userId  String
+  user    User             @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
+
+model ActivityLog {
+  id             String   @id @default(cuid())
+  action         String   // e.g. "ASSET_CREATED", "TRANSFER_APPROVED"
+  targetResource String?  // e.g. "Asset", "Department"
+  targetId       String?  // The ID of the resource
+  details        String?
+  category       String?  // "Alerts", "Approvals", "Bookings"
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@map("activity_logs")
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  type        String   // "utilization", "maintenance", "audit_discrepancy"
+  title       String
+  data        Json?    // Flexible JSON blob for report data
+  generatedAt DateTime @default(now())
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  generatedById String
+  generatedBy   User   @relation(fields: [generatedById], references: [id])
+
+  @@map("reports")
+}
+
+// ─── AI Voice & OmniDimension Communication Layer ───────────────────────────
+
+enum AICallStatus {
+  QUEUED
+  INITIATED
+  RINGING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  NO_ANSWER
+  CANCELLED
+}
+
+enum AICallPurpose {
+  MAINTENANCE_FOLLOWUP
+  ASSET_RETURN_REMINDER
+  WARRANTY_REMINDER
+  ASSET_AUDIT_VERIFICATION
+  GENERAL_NOTIFICATION
+  CUSTOM
+}
+
+enum AIAuditOutcome {
+  VERIFIED
+  NOT_VERIFIED
+  ASSET_MISSING
+  ASSET_DAMAGED
+  EMPLOYEE_DISPUTED
+  NO_ANSWER
+  CALL_FAILED
+  UNKNOWN
+}
+
+model AIVoiceCall {
+  id                  String         @id @default(cuid())
+  callId              String?        @unique // OmniDimension external call ID
+  agentId             String?        // OmniDimension Agent ID
+  toNumber            String         // Destination phone number in E.164 (+91...)
+  fromNumber          String?
+  purpose             AICallPurpose  @default(GENERAL_NOTIFICATION)
+  customPurpose       String?        // Text if purpose is CUSTOM
+  status              AICallStatus   @default(QUEUED)
+  startTime           DateTime?
+  endTime             DateTime?
+  duration            Int?           // Duration in seconds
+  outcome             AIAuditOutcome?
+  summary             String?
+  transcript          String?
+  recordingUrl        String?
+  sentiment           String?        // positive | neutral | negative
+  context             Json?          // Dynamic context passed to agent
+  extractedData       Json?          // Structured entities extracted from post-call webhook
+
+  // Relations
+  employeeId          String?
+  employee            User?          @relation("EmployeeVoiceCalls", fields: [employeeId], references: [id])
+
+  initiatedById       String?
+  initiatedBy         User?          @relation("InitiatedVoiceCalls", fields: [initiatedById], references: [id])
+
+  assetId             String?
+  asset               Asset?         @relation("AssetVoiceCalls", fields: [assetId], references: [id])
+
+  maintenanceId       String?
+  maintenance         MaintenanceRequest? @relation("MaintenanceVoiceCalls", fields: [maintenanceId], references: [id])
+
+  auditCycleId        String?
+  auditCycle          AuditCycle?    @relation("AuditVoiceCalls", fields: [auditCycleId], references: [id])
+
+  campaignId          String?
+  campaign            AICallCampaign? @relation("CampaignVoiceCalls", fields: [campaignId], references: [id])
+
+  organizationId      String?
+  organization        Organization?  @relation(fields: [organizationId], references: [id])
+
+  events              AICallEvent[]
+
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  @@index([organizationId])
+  @@index([employeeId])
+  @@index([assetId])
+  @@index([status])
+  @@index([purpose])
+  @@index([createdAt])
+  @@map("ai_voice_calls")
+}
+
+model AICallCampaign {
+  id                  String         @id @default(cuid())
+  title               String
+  purpose             AICallPurpose  @default(ASSET_AUDIT_VERIFICATION)
+  customPurpose       String?
+  status              String         @default("PENDING") // PENDING | RUNNING | COMPLETED | CANCELLED
+  agentId             String?
+  scheduledAt         DateTime?
+
+  totalCalls          Int            @default(0)
+  completedCalls      Int            @default(0)
+  inProgressCalls     Int            @default(0)
+  noAnswerCalls       Int            @default(0)
+  failedCalls         Int            @default(0)
+  cancelledCalls      Int            @default(0)
+  verifiedCount       Int            @default(0)
+  notVerifiedCount    Int            @default(0)
+
+  createdById         String?
+  createdBy           User?          @relation("CreatedCallCampaigns", fields: [createdById], references: [id])
+
+  auditCycleId        String?
+  auditCycle          AuditCycle?    @relation("AuditCallCampaigns", fields: [auditCycleId], references: [id])
+
+  organizationId      String?
+  organization        Organization?  @relation(fields: [organizationId], references: [id])
+
+  calls               AIVoiceCall[]  @relation("CampaignVoiceCalls")
+
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("ai_call_campaigns")
+}
+
+model AICallEvent {
+  id                  String         @id @default(cuid())
+  callId              String
+  call                AIVoiceCall    @relation(fields: [callId], references: [id], onDelete: Cascade)
+  eventType           String         // INITIATED | RINGING | IN_PROGRESS | COMPLETED | FAILED | WEBHOOK_RECEIVED
+  payload             Json?
+  createdAt           DateTime       @default(now())
+
+  @@index([callId])
+  @@map("ai_call_events")
+}
+
+model AIAuditVerification {
+  id                  String         @id @default(cuid())
+  callId              String?
+  auditCycleId        String
+  auditCycle          AuditCycle     @relation(fields: [auditCycleId], references: [id], onDelete: Cascade)
+  auditItemId         String?
+  assetId             String
+  asset               Asset          @relation(fields: [assetId], references: [id])
+  employeeId          String
+  verificationStatus  AIAuditOutcome @default(UNKNOWN)
+  confidence          Float?
+  notes               String?
+  verifiedAt          DateTime       @default(now())
+
+  organizationId      String?
+  organization        Organization?  @relation(fields: [organizationId], references: [id])
+
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  @@index([auditCycleId])
+  @@index([assetId])
+  @@index([employeeId])
+  @@map("ai_audit_verifications")
+}
+

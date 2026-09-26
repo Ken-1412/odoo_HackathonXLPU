@@ -1,0 +1,45 @@
+/**
+ * STOCKSENSE — Design Tokens
+ * Clean White + Minimal Blue SaaS Theme
+ */
+:root {
+  --bg: #F8FAFC;
+  --surface: #FFFFFF;
+  --surface-light: #FFFFFF;
+  --surface-elevated: #F1F5F9;
+  --border: #E2E8F0;
+  --border-active: #2563EB;
+  --ivory: #1E293B;
+  --ivory-dim: #475569;
+  --muted: #64748B;
+  --muted-dim: #94A3B8;
+  --gold: #2563EB;
+  --gold-light: #3B82F6;
+  --gold-deep: #1D4ED8;
+  --orange: #D97706;
+  --green: #16A34A;
+  --red: #DC2626;
+  --blue: #2563EB;
+
+  --font-display: "Space Grotesk", Inter, system-ui, sans-serif;
+  --font-ui: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+.stocksense-bg {
+  background-color: var(--bg);
+  color: #1E293B;
+}
+
+.stocksense-warehouse-layer {
+  display: none !important;
+}
+
+.stocksense-grid-layer {
+  display: none !important;
+}
+
+.stocksense-focus:focus-visible {
+  outline: 2px solid #2563EB;
+  outline-offset: 2px;
+}

@@ -1,0 +1,50 @@
+{
+  "name": "assetflow-backend",
+  "version": "1.0.0",
+  "description": "AssetFlow Enterprise Asset & Resource Management System — Backend API",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "nodemon",
+    "build": "tsc",
+    "start": "npx prisma db push && node dist/server.js",
+    "db:migrate": "npx prisma migrate dev",
+    "db:push": "npx prisma db push",
+    "db:seed": "npx tsx prisma/seed.ts",
+    "db:studio": "npx prisma studio",
+    "db:generate": "npx prisma generate",
+    "db:reset": "npx prisma migrate reset --force",
+    "db:setup": "powershell -ExecutionPolicy Bypass -File setup-db.ps1"
+  },
+  "dependencies": {
+    "@emailjs/nodejs": "^5.0.2",
+    "@omnidim-ai/sdk": "^0.6.0",
+    "@prisma/client": "^6.9.0",
+    "bcryptjs": "^3.0.2",
+    "cloudinary": "^2.6.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^9.10.2",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.2",
+    "resend": "^6.18.1",
+    "zod": "^3.25.3"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.8",
+    "@types/cors": "^2.8.18",
+    "@types/express": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/morgan": "^1.9.9",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^24.0.0",
+    "nodemon": "^3.1.9",
+    "prisma": "^6.9.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.8.0"
+  }
+}
