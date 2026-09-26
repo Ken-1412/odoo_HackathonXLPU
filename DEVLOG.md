@@ -20,4 +20,6 @@
 - Created Employee model with role-based access
 - Built inventory service with create, read, update, delete operations
 - Added pagination and filtering utilities
+- Implemented /api/products endpoints (GET, POST, PUT, DELETE)
+- Added search and category filtering
 
