@@ -24,4 +24,6 @@
 - Added search and category filtering
 - Created warehouse CRUD endpoints
 - Added warehouse capacity tracking and zone management
+- Implemented inter-warehouse stock transfers
+- Added stock adjustment with reason tracking and audit log
 
