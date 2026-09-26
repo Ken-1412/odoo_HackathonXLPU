@@ -36,4 +36,6 @@
 - Added feature grid and testimonials sections
 - Created login and signup pages with form validation
 - Added forgot password and reset password flows
+- Built responsive dashboard layout with collapsible sidebar
+- Added header with user menu and notifications
 
