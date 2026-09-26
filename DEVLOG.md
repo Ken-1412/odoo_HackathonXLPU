@@ -14,4 +14,6 @@
 - Added indexing for frequently queried fields
 - Implemented JWT-based auth with access and refresh tokens
 - Added password hashing with bcrypt
+- Created /api/auth/register and /api/auth/login routes
+- Added input validation with Zod
 
