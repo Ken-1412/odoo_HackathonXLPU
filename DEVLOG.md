@@ -52,4 +52,6 @@
 - Built knowledge base sync for inventory data
 - Implemented demand forecasting using historical data
 - Added automated low-stock alerts via voice and email
+- Built AI communications page with call logs and analytics
+- Added real-time call status monitoring
 
