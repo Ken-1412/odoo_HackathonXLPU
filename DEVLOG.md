@@ -10,4 +10,6 @@
 ## Backend Development
 - Created Express server with CORS, helmet, and body-parser middleware
 - Added health check endpoint
+- Designed Mongoose schemas for Product, Warehouse, and Category
+- Added indexing for frequently queried fields
 
