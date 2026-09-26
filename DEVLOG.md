@@ -28,4 +28,6 @@
 - Added stock adjustment with reason tracking and audit log
 - Created automatic reorder rule system
 - Added configurable min/max stock thresholds per product
+- Integrated Nodemailer for transactional emails
+- Created HTML email templates for alerts and onboarding
 
