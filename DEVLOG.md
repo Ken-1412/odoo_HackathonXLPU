@@ -22,4 +22,6 @@
 - Added pagination and filtering utilities
 - Implemented /api/products endpoints (GET, POST, PUT, DELETE)
 - Added search and category filtering
+- Created warehouse CRUD endpoints
+- Added warehouse capacity tracking and zone management
 
