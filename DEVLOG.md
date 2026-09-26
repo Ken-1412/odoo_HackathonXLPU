@@ -44,4 +44,6 @@
 - Built stock transfer wizard with source/destination selection
 - Added analytics dashboard with inventory trends charts
 - Integrated recharts for data visualization
+- Implemented Cmd+K command palette with fuzzy search
+- Added keyboard shortcuts for common actions
 
