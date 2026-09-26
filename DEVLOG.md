@@ -40,4 +40,6 @@
 - Added header with user menu and notifications
 - Implemented product listing with sortable, filterable tables
 - Added inline editing and bulk actions
+- Created warehouse overview page with capacity visualization
+- Built stock transfer wizard with source/destination selection
 
