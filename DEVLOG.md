@@ -7,3 +7,7 @@
 - Scaffolded frontend with Vite + React + TypeScript
 - Integrated TailwindCSS with custom config
 
+## Backend Development
+- Created Express server with CORS, helmet, and body-parser middleware
+- Added health check endpoint
+
