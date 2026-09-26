@@ -12,4 +12,6 @@
 - Added health check endpoint
 - Designed Mongoose schemas for Product, Warehouse, and Category
 - Added indexing for frequently queried fields
+- Implemented JWT-based auth with access and refresh tokens
+- Added password hashing with bcrypt
 
