@@ -42,4 +42,6 @@
 - Added inline editing and bulk actions
 - Created warehouse overview page with capacity visualization
 - Built stock transfer wizard with source/destination selection
+- Added analytics dashboard with inventory trends charts
+- Integrated recharts for data visualization
 
