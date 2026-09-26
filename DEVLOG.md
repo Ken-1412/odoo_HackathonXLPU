@@ -50,4 +50,6 @@
 ## AI Integration
 - Integrated OmniDimension API for AI voice calls
 - Built knowledge base sync for inventory data
+- Implemented demand forecasting using historical data
+- Added automated low-stock alerts via voice and email
 
