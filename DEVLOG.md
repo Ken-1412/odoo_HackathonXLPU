@@ -59,3 +59,7 @@
 - Applied glassmorphism effects to cards and modals
 - Added smooth page transitions and hover micro-animations
 
+## Bug Fixes
+- Fixed CORS configuration for cross-origin requests
+- Improved API error responses with consistent format
+
