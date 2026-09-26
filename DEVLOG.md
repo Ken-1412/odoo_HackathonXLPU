@@ -63,3 +63,7 @@
 - Fixed CORS configuration for cross-origin requests
 - Improved API error responses with consistent format
 
+## Documentation
+- Wrote detailed README with architecture overview
+- Added environment setup guide and API documentation
+
