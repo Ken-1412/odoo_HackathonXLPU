@@ -47,3 +47,7 @@
 - Implemented Cmd+K command palette with fuzzy search
 - Added keyboard shortcuts for common actions
 
+## AI Integration
+- Integrated OmniDimension API for AI voice calls
+- Built knowledge base sync for inventory data
+
